@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Review {
+  id               BigInt      @id @default(autoincrement())
+  userId           BigInt
+  user             User        @relation(fields: [userId], references: [id])
+  address          String      @db.VarChar(255)
+  content          String?     @db.VarChar(255)
+  mainImgUrl       String      @db.VarChar(100000)
+  roadName         String      @db.VarChar(255)
+  subImgUrl        String?     @db.VarChar(100000)
+  title            String      @db.VarChar(255)
+  videoUrl         String?     @db.VarChar(255)
+  createdAt        DateTime    @default(now())
+  modifiedAt       DateTime    @updatedAt
+  middleSubImgUrl  String      @db.VarChar(100000)
+  smallSubImgUrl   String      @db.VarChar(100000)
+  middleMainImgUrl String?     @db.VarChar(100000)
+  smallMainImgUrl  String?     @db.VarChar(1000000)
+  latitude         Float
+  longitude        Float
+  likes            Like[]
+  reviewTags       ReviewTag[]
+  comments         Comment[]
+
+  @@map("Review")
+}
+
+model User {
+  id            BigInt  @id @default(autoincrement())
+  email         String  @db.VarChar(255)
+  kakaoId       String? @db.VarChar(255)
+  nickname      String  @db.VarChar(255)
+  password      String  @db.VarChar(255)
+  profileImgUrl String? @db.VarChar(10000)
+  role          Role
+
+  reviews  Review[]
+  comments Comment[]
+  likes    Like[]
+
+  @@map("User")
+}
+
+model Like {
+  id       Int    @id @default(autoincrement())
+  reviewId BigInt
+  userId   BigInt
+
+  review Review @relation(fields: [reviewId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([reviewId, userId]) // 하나의 유저는 같은 리뷰에 대해 하나의 좋아요만 가능
+  @@map("Like")
+}
+
+model Tag {
+  id   BigInt  @id @default(autoincrement())
+  name String? @db.VarChar(255)
+
+  reviewTags ReviewTag[]
+
+  @@map("Tag")
+}
+
+model ReviewTag {
+  id       BigInt @id @default(autoincrement())
+  reviewId BigInt
+  tagId    BigInt
+
+  review Review @relation(fields: [reviewId], references: [id])
+  tag    Tag    @relation(fields: [tagId], references: [id])
+
+  @@map("ReviewTag")
+}
+
+model Comment {
+  id       BigInt  @id @default(autoincrement())
+  reviewId BigInt
+  userId   BigInt
+  comment  String? @db.VarChar(255)
+
+  review Review @relation(fields: [reviewId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("Comment")
+}
+
+enum Role {
+  USER
+}
