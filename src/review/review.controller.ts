@@ -22,7 +22,7 @@ export class ReviewController {
 
   @Get(":page/:limit")
   findAll(@Param("page") page: number, @Param("limit") limit: number) {
-    return this.reviewService.getReivews(page, limit);
+    return this.reviewService.getReivews(+page, +limit);
   }
 
   @Get(":id")
