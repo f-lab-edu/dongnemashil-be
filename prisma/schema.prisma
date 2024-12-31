@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Review {
+  id               String      @id @default(cuid())
+  userId           String
+  user             User        @relation(fields: [userId], references: [id])
+  address          String      
+  content          String?     
+  mainImgUrl       String      @db.VarChar(100000)
+  roadName         String      
+  subImgUrl        String?     @db.VarChar(100000)
+  title            String      
+  videoUrl         String?     
+  createdAt        DateTime    @default(now())
+  modifiedAt       DateTime    @updatedAt
+  middleSubImgUrl  String      @db.VarChar(100000)
+  smallSubImgUrl   String      @db.VarChar(100000)
+  middleMainImgUrl String?     @db.VarChar(100000)
+  smallMainImgUrl  String?     @db.VarChar(100000)
+  latitude         Float
+  longitude        Float
+  likes            Like[]
+  reviewTags       ReviewTag[]
+  comments         Comment[]
+}
+
+model User {
+  id            String  @id @default(cuid())
+  email         String  
+  kakaoId       String? 
+  nickname      String  
+  password      String  
+  profileImgUrl String? @db.VarChar(100000)
+  role          Role
+
+  reviews  Review[]
+  comments Comment[]
+  likes    Like[]
+}
+
+model Like {
+  id       String    @id @default(cuid())
+  reviewId String
+  userId   String
+
+  review Review @relation(fields: [reviewId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([reviewId, userId]) // 하나의 유저는 같은 리뷰에 대해 하나의 좋아요만 가능
+}
+
+model Tag {
+  id   String  @id @default(cuid())
+  name String?
+
+  reviewTags ReviewTag[]
+}
+
+model ReviewTag {
+  id       String @id @default(cuid())
+  reviewId String
+  tagId    String
+
+  review Review @relation(fields: [reviewId], references: [id])
+  tag    Tag    @relation(fields: [tagId], references: [id])
+}
+
+model Comment {
+  id       String  @id @default(cuid())
+  reviewId String
+  userId   String
+  comment  String? 
+
+  review Review @relation(fields: [reviewId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+}
