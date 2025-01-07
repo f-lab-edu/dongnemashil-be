@@ -45,7 +45,6 @@ model User {
   nickname      String  
   password      String  
   profileImgUrl String? @db.VarChar(100000)
-  role          Role
 
   reviews  Review[]
   comments Comment[]
@@ -87,8 +86,4 @@ model Comment {
 
   review Review @relation(fields: [reviewId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
-}
-
-enum Role {
-  USER
 }
